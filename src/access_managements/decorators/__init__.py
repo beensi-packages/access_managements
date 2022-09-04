@@ -7,24 +7,21 @@ def apikey_authorization(func):
     async def wrapper(*args, **kwargs):
         rsp = {}
         try:
-            print(kwargs)
-            if 'logger' in kwargs and 'request_url' in kwargs:
-                kwargs['logger'].info(f"Start requesting \'{kwargs['request_url']}\'.")
+            kwargs['logger_func'].info(f"Start requesting \'{kwargs['request'].url._url}\'.")
 
             if not kwargs['db'].query(kwargs['model']).filter(kwargs['model'].id == kwargs['apikey'],
                                                               kwargs['model'].is_active == True).first():
-                if 'logger' in kwargs:
-                    kwargs['logger'].info('APIKey is not entered or the entered APIKey is not acceptable.')
                 rsp = not_access()
+                kwargs['logger_func'].info("APIKey is not entered or the entered APIKey is not acceptable"
+                                           f"(request: {kwargs['request'].url._url}).")
             else:
                 rsp = await func(*args, **kwargs)
         except Exception as exp:
-            if 'logger' in kwargs:
-                kwargs['logger'].error(exp.args[0])
             rsp = exception(exp.args[0])
+            kwargs['logger_func'].error(exp.args[0])
         finally:
-            if 'logger' in kwargs and 'request_url' in kwargs:
-                kwargs['logger'].info(f"End of request \'{kwargs['request_url']}\'.")
+
+            kwargs['logger_func'].info(f"End of request \'{kwargs['request'].url._url}\'.")
             return rsp
 
     return wrapper
