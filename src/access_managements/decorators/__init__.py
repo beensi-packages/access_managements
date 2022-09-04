@@ -7,6 +7,7 @@ def apikey_authorization(func):
     async def wrapper(*args, **kwargs):
         rsp = {}
         try:
+            print(kwargs)
             if 'logger' in kwargs and 'request_url' in kwargs:
                 kwargs['logger'].info(f"Start requesting \'{kwargs['request_url']}\'.")
 
